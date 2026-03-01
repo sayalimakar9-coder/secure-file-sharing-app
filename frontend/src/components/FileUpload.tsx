@@ -77,7 +77,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
       }
 
       const response = await axios.post(
-        'http://localhost:5000/api/files/upload',
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/files/upload`,
         formData,
         {
           headers: {

@@ -53,7 +53,7 @@ const SharedFileAccess: React.FC = () => {
       }
       
       try {
-        const response = await axios.get(`http://localhost:5000/api/shares/verify/${shareId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares/verify/${shareId}`);
         setShareInfo(response.data);
         setActiveStep(1); // Move to OTP step if share exists
         setLoading(false);
@@ -95,7 +95,7 @@ const SharedFileAccess: React.FC = () => {
       }
       
       const response = await axios.post(
-        `http://localhost:5000/api/shares/access/${shareId}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares/access/${shareId}`,
         data
       );
       
@@ -122,7 +122,7 @@ const SharedFileAccess: React.FC = () => {
       setLoading(true);
       
       // Create download URL
-      const downloadUrl = `http://localhost:5000/api/shares/download/${shareId}`;
+      const downloadUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares/download/${shareId}`;
       
       console.log('Starting download with access token:', accessToken);
       console.log('File info:', JSON.stringify(fileInfo, null, 2));

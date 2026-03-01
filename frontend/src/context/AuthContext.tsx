@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 // Define types for our context
 interface User {
@@ -69,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             // Try to validate token with a backend request
             // Using void to acknowledge we're ignoring the response intentionally
-            await axios.get('http://localhost:5000/api/auth/validate', {
+            await axios.get(`${API_BASE_URL}/auth/validate`, {
               headers: { 'x-auth-token': storedToken }
             });
             

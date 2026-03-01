@@ -94,7 +94,7 @@ const FileShareModal: React.FC<FileShareModalProps> = ({ open, onClose, file }) 
       }
       
       const response = await axios.post(
-        'http://localhost:5000/api/shares',
+        `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares`,
         {
           fileId: file._id || file.id,
           recipientEmail,

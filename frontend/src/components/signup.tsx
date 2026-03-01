@@ -109,7 +109,7 @@ export default function SignUp() {
         setLoading(true);
 
         // Make API call directly from component
-        await axios.post('http://localhost:5000/api/auth/register', {
+        await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/register`, {
           username,
           email,
           phone: phoneNumber,

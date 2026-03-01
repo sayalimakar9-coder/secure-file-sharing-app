@@ -171,7 +171,7 @@ export default function OtpVerification() {
     
     try {
       // Resend OTP by calling signup endpoint again
-      await axios.post('http://localhost:5000/api/auth/signup', {
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/signup`, {
         email,
         // We need to send these fields but they'll be ignored for existing users
         username: 'resend',
@@ -207,7 +207,7 @@ export default function OtpVerification() {
       setLoading(true);
       
       // Make API call to verify OTP
-      await axios.post('http://localhost:5000/api/auth/verify', {
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/verify`, {
         email,
         otp: otpString
       });
@@ -216,7 +216,7 @@ export default function OtpVerification() {
       if (password) {
         try {
           // Make login API call
-          const loginResponse = await axios.post('http://localhost:5000/api/auth/login', {
+          const loginResponse = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/login`, {
             email,
             password
           });

@@ -105,13 +105,13 @@ export default function Home() {
       const token = localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
       
       const [filesResponse, sharesResponse, userResponse] = await Promise.all([
-        axios.get('http://localhost:5000/api/files', {
+        axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/files`, {
           headers: { 'x-auth-token': token }
         }),
-        axios.get('http://localhost:5000/api/shares', {
+        axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares`, {
           headers: { 'x-auth-token': token }
         }),
-        axios.get('http://localhost:5000/api/auth/profile', {
+        axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/auth/profile`, {
           headers: { 'x-auth-token': token }
         })
       ]);
@@ -186,7 +186,7 @@ export default function Home() {
     try {
       const token = localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
       
-      await axios.delete(`http://localhost:5000/api/files/${fileToDelete._id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/files/${fileToDelete._id}`, {
         headers: { 'x-auth-token': token }
       });
       
@@ -223,7 +223,7 @@ export default function Home() {
     try {
       const token = localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
       
-      await axios.delete(`http://localhost:5000/api/shares/${shareToRevoke._id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/shares/${shareToRevoke._id}`, {
         headers: { 'x-auth-token': token }
       });
       
@@ -388,7 +388,7 @@ export default function Home() {
                                     if (token) {
                                       // Use axios with proper headers instead of a direct link
                                       const response = await axios({
-                                        url: `http://localhost:5000/api/files/download/${file._id || file.id}`,
+                                        url: `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/files/download/${file._id || file.id}`,
                                         method: 'GET',
                                         responseType: 'blob',
                                         headers: {
