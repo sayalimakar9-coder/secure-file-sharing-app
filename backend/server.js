@@ -1,8 +1,11 @@
-// Load environment variables from .env file
-require('dotenv').config();
+// Load environment variables from .env file (development only)
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 // DEBUG: Log environment variables on startup
 console.log('\n=== ENVIRONMENT VARIABLES CHECK ===');
+console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
 console.log('EMAIL_USER:', process.env.EMAIL_USER ? `✓ Set (${process.env.EMAIL_USER})` : '❌ Missing');
 console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '❌ Missing');
 if (process.env.EMAIL_PASS) {
