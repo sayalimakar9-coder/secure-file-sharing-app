@@ -440,7 +440,8 @@ router.get('/download/:shareId', async (req, res) => {
       
       // Set appropriate headers
       res.setHeader('Content-Type', file.mimetype || 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(file.originalName)}"`);
+      const encodedFileName = encodeURIComponent(file.originalName);
+      res.setHeader('Content-Disposition', 'attachment; filename="' + encodedFileName + '"');
       
       // Stream the file instead of using res.download for better error handling
       const fileStream = fs.createReadStream(tempFilePath);
