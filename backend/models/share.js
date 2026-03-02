@@ -27,6 +27,10 @@ const shareSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  emailDelivered: {
+    type: Boolean,
+    default: true // Assume email was delivered unless otherwise specified
+  },
   isPasswordProtected: {
     type: Boolean,
     default: false

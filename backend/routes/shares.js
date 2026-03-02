@@ -69,7 +69,8 @@ router.post('/', auth, async (req, res) => {
       permission,
       isPasswordProtected: passwordProtect && !!password,
       password: hashedPassword,
-      expiresAt
+      expiresAt,
+      emailDelivered: true // Will be set to false if email fails
     });
     
     await share.save();
@@ -100,6 +101,10 @@ router.post('/', auth, async (req, res) => {
       };
     }
     
+    // Update share record with email delivery status
+    share.emailDelivered = emailResult && emailResult.success;
+    await share.save();
+    
     // Return response with share information and email status
     res.json({
       message: emailResult && emailResult.success 
@@ -108,6 +113,7 @@ router.post('/', auth, async (req, res) => {
       shareId,
       shareLink,
       emailSent: emailResult && emailResult.success,
+      emailDelivered: share.emailDelivered,
       emailError: emailResult && !emailResult.success ? emailResult.error : null,
       otp: emailResult && !emailResult.success ? otp : undefined // Include OTP in response if email failed
     });
@@ -164,7 +170,8 @@ router.get('/verify/:shareId', async (req, res) => {
       fileName: share.file.originalName,
       fileSize: share.file.size,
       isPasswordProtected: share.isPasswordProtected,
-      expiresAt: share.expiresAt
+      expiresAt: share.expiresAt,
+      emailDelivered: share.emailDelivered // Include email delivery status
     });
   } catch (error) {
     console.error('Error verifying share:', error);

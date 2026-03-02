@@ -43,6 +43,7 @@ const SharedFileAccess: React.FC = () => {
   const [accessToken, setAccessToken] = useState('');
   const [fileInfo, setFileInfo] = useState<any>(null);
   const [permissionLevel, setPermissionLevel] = useState('');
+  const [manualOtp, setManualOtp] = useState(''); // For displaying OTP when email fails
   
   // Initialize by verifying the share exists
   useEffect(() => {
@@ -62,6 +63,12 @@ const SharedFileAccess: React.FC = () => {
         const response = await axios.get(url);
         console.log('Share verification response:', response.data);
         setShareInfo(response.data);
+        
+        // If manual OTP is provided (email failed), store it
+        if (response.data.manualOtp) {
+          setManualOtp(response.data.manualOtp);
+        }
+        
         setActiveStep(1); // Move to OTP step if share exists
         setLoading(false);
       } catch (error: any) {
@@ -230,6 +237,52 @@ const SharedFileAccess: React.FC = () => {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   This file was shared with you. Please enter the OTP sent to your email to access it.
                 </Typography>
+                
+                {/* Display message when email delivery failed */}
+                {!shareInfo.emailDelivered && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>⚠️ Email Delivery Issue:</strong> The verification code could not be sent to your email due to a technical issue. 
+                    </Typography>
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                      Please ask the person who shared this file to provide you with the 6-digit verification code.
+                    </Typography>
+                  </Alert>
+                )}
+                
+                {/* Display manual OTP when provided (share creator fallback) */}
+                {manualOtp && (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    <Typography variant="body2" gutterBottom>
+                      ✓ <strong>Verification Code:</strong> Here's your code to share with the recipient:
+                    </Typography>
+                    <Box 
+                      sx={{ 
+                        mt: 1,
+                        p: 1.5, 
+                        backgroundColor: '#e8f5e9', 
+                        border: '2px solid #4caf50',
+                        borderRadius: 1,
+                        textAlign: 'center'
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '24px', letterSpacing: '3px', fontFamily: 'monospace' }}>
+                        {manualOtp}
+                      </Typography>
+                    </Box>
+                    <Button 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ mt: 1 }}
+                      onClick={() => {
+                        navigator.clipboard.writeText(manualOtp);
+                        setError('Code copied to clipboard');
+                      }}
+                    >
+                      📋 Copy Code
+                    </Button>
+                  </Alert>
+                )}
                 
                 <Divider sx={{ my: 2 }} />
               </Box>
