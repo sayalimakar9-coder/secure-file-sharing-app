@@ -265,76 +265,89 @@ const SharedFileAccess: React.FC = () => {
           <Box sx={{ mt: 3 }}>
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
             
-            <Typography variant="h6" gutterBottom>
-              File Access Verification
-            </Typography>
+            {loading && !shareInfo && (
+              <Box sx={{ textAlign: 'center', py: 3 }}>
+                <CircularProgress sx={{ mb: 2 }} />
+                <Typography>Loading share information...</Typography>
+              </Box>
+            )}
             
-            {shareInfo && (
-              <Box sx={{ mb: 3 }}>
-                <Stack spacing={2} direction="row" alignItems="center" sx={{ mb: 2 }}>
-                  <DescriptionIcon color="primary" />
-                  <Typography variant="body1">{shareInfo.fileName}</Typography>
-                  {shareInfo.fileSize && (
-                    <Chip 
-                      label={`${formatBytes(shareInfo.fileSize)}`} 
-                      size="small" 
-                      variant="outlined"
-                    />
-                  )}
-                </Stack>
-                
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  This file was shared with you. Please enter the OTP sent to your email to access it.
+            {shareInfo ? (
+              <>
+                <Typography variant="h6" gutterBottom>
+                  File Access Verification
                 </Typography>
                 
-                {/* Display message when email delivery failed */}
-                {!shareInfo.emailDelivered && (
-                  <Alert severity="warning" sx={{ mb: 2 }}>
-                    <Typography variant="body2">
-                      <strong>⚠️ Email Delivery Issue:</strong> The verification code could not be sent to your email due to a technical issue. 
-                    </Typography>
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      Please ask the person who shared this file to provide you with the 6-digit verification code.
-                    </Typography>
-                  </Alert>
-                )}
-                
-                {/* Display manual OTP when provided (share creator fallback) */}
-                {manualOtp && (
-                  <Alert severity="success" sx={{ mb: 2 }}>
-                    <Typography variant="body2" gutterBottom>
-                      ✓ <strong>Verification Code:</strong> Here's your code to share with the recipient:
-                    </Typography>
-                    <Box 
-                      sx={{ 
-                        mt: 1,
-                        p: 1.5, 
-                        backgroundColor: '#e8f5e9', 
-                        border: '2px solid #4caf50',
-                        borderRadius: 1,
-                        textAlign: 'center'
-                      }}
-                    >
-                      <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '24px', letterSpacing: '3px', fontFamily: 'monospace' }}>
-                        {manualOtp}
+                <Box sx={{ mb: 3 }}>
+                  <Stack spacing={2} direction="row" alignItems="center" sx={{ mb: 2 }}>
+                    <DescriptionIcon color="primary" />
+                    <Typography variant="body1">{shareInfo.fileName}</Typography>
+                    {shareInfo.fileSize && (
+                      <Chip 
+                        label={`${formatBytes(shareInfo.fileSize)}`} 
+                        size="small" 
+                        variant="outlined"
+                      />
+                    )}
+                  </Stack>
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    This file was shared with you. Please enter the OTP sent to your email to access it.
+                  </Typography>
+                  
+                  {/* Display message when email delivery failed */}
+                  {!shareInfo.emailDelivered && (
+                    <Alert severity="warning" sx={{ mb: 2 }}>
+                      <Typography variant="body2">
+                        <strong>⚠️ Email Delivery Issue:</strong> The verification code could not be sent to your email due to a technical issue. 
                       </Typography>
-                    </Box>
-                    <Button 
-                      size="small" 
-                      variant="outlined"
-                      sx={{ mt: 1 }}
-                      onClick={() => {
-                        navigator.clipboard.writeText(manualOtp);
-                        setError('Code copied to clipboard');
-                      }}
-                    >
-                      📋 Copy Code
-                    </Button>
-                  </Alert>
-                )}
-                
-                <Divider sx={{ my: 2 }} />
-              </Box>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        Please ask the person who shared this file to provide you with the 6-digit verification code.
+                      </Typography>
+                    </Alert>
+                  )}
+                  
+                  {/* Display manual OTP when provided (share creator fallback) */}
+                  {manualOtp && (
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                      <Typography variant="body2" gutterBottom>
+                        ✓ <strong>Verification Code:</strong> Here's your code to share with the recipient:
+                      </Typography>
+                      <Box 
+                        sx={{ 
+                          mt: 1,
+                          p: 1.5, 
+                          backgroundColor: '#e8f5e9', 
+                          border: '2px solid #4caf50',
+                          borderRadius: 1,
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: '24px', letterSpacing: '3px', fontFamily: 'monospace' }}>
+                          {manualOtp}
+                        </Typography>
+                      </Box>
+                      <Button 
+                        size="small" 
+                        variant="outlined"
+                        sx={{ mt: 1 }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(manualOtp);
+                          setError('Code copied to clipboard');
+                        }}
+                      >
+                        📋 Copy Code
+                      </Button>
+                    </Alert>
+                  )}
+                  
+                  <Divider sx={{ my: 2 }} />
+                </Box>
+              </>
+            ) : (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Loading file information...
+              </Alert>
             )}
             
             <TextField
@@ -456,7 +469,13 @@ const SharedFileAccess: React.FC = () => {
         );
       
       default:
-        return null;
+        return (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              Invalid step - please refresh the page
+            </Alert>
+          </Box>
+        );
     }
   };
   
@@ -476,7 +495,12 @@ const SharedFileAccess: React.FC = () => {
             ))}
           </Stepper>
           
-          {renderStepContent()}
+          {renderStepContent() || (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography>Loading...</Typography>
+            </Box>
+          )}
         </Paper>
       </Box>
     </ThemeWrapper>
