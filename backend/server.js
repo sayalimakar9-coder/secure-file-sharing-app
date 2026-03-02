@@ -1,19 +1,12 @@
 // Load environment variables from .env file (development only)
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
+// On Render: environment variables are set directly via dashboard
+if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev') {
+  try {
+    require('dotenv').config();
+  } catch (e) {
+    // Ignore if dotenv not available
+  }
 }
-
-// DEBUG: Log environment variables on startup
-console.log('\n=== ENVIRONMENT VARIABLES CHECK ===');
-console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
-console.log('EMAIL_USER:', process.env.EMAIL_USER ? `✓ Set (${process.env.EMAIL_USER})` : '❌ Missing');
-console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '❌ Missing');
-if (process.env.EMAIL_PASS) {
-  console.log('EMAIL_PASS length:', process.env.EMAIL_PASS.length);
-  console.log('EMAIL_PASS value:', process.env.EMAIL_PASS);
-}
-console.log('MONGO_URI:', process.env.MONGO_URI ? '✓ Set' : '❌ Missing');
-console.log('=== END ENVIRONMENT CHECK ===\n');
 
 const express = require('express');
 const mongoose = require('mongoose');
