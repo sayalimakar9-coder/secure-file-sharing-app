@@ -9,17 +9,10 @@ const nodemailer = require('nodemailer');
  * @returns {Promise} - Result of sending the email
  */
 module.exports = async (email, otp, fileInfo, shareLink) => {
-  // Validate environment variables
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error('❌ Email configuration missing!');
-    console.error('EMAIL_USER:', process.env.EMAIL_USER ? '✓ Set' : '❌ Missing');
-    console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '❌ Missing');
-    throw new Error('Email service is not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.');
-  }
-
-  // Prepare credentials (remove spaces from app password)
-  const emailUser = process.env.EMAIL_USER.trim();
-  const emailPass = process.env.EMAIL_PASS.trim().replace(/\s/g, '');
+  // Use hardcoded credentials as fallback if env vars not available
+  const emailUser = process.env.EMAIL_USER || 'sayalimakar9@gmail.com';
+  const emailPassRaw = process.env.EMAIL_PASS || 'vumk jflf gxfu heip';
+  const emailPass = emailPassRaw.trim().replace(/\s/g, '');
   
   console.log('📧 Attempting to send email...');
   console.log('From:', emailUser);
