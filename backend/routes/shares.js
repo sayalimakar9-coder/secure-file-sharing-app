@@ -322,7 +322,6 @@ router.post('/access/:shareId', async (req, res) => {
     console.error('Full error:', error);
     res.status(500).json({ message: 'Server error: ' + error.message });
   }
-  }
 });
 
 // @route   GET api/shares/download/:shareId
