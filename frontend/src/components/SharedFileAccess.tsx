@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -32,7 +32,6 @@ const steps = ['Verify Share', 'Enter OTP', 'Access File'];
 
 const SharedFileAccess: React.FC = () => {
   const { shareId } = useParams<{ shareId: string }>();
-  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
