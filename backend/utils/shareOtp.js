@@ -1,7 +1,7 @@
-const sgMail = require('@sendgrid/mail');
+const { Resend } = require('resend');
 
 /**
- * Send share OTP email to recipient using SendGrid
+ * Send share OTP email to recipient using Resend
  * @param {string} email - Recipient email
  * @param {string} otp - One-time password
  * @param {Object} fileInfo - Information about the shared file
@@ -10,29 +10,27 @@ const sgMail = require('@sendgrid/mail');
  */
 module.exports = async (email, otp, fileInfo, shareLink) => {
   // Use environment variable (required on Render)
-  const sendGridApiKey = process.env.SENDGRID_API_KEY;
+  const resendApiKey = process.env.RESEND_API_KEY;
   
-  if (!sendGridApiKey) {
-    console.error('❌ SendGrid API key not configured!');
-    console.error('Please set SENDGRID_API_KEY environment variable in Render');
+  if (!resendApiKey) {
+    console.error('❌ Resend API key not configured!');
+    console.error('Please set RESEND_API_KEY environment variable in Render');
     return { 
       success: false, 
-      error: 'SendGrid API key not configured',
-      details: 'Set SENDGRID_API_KEY in Render Environment Variables'
+      error: 'Resend API key not configured',
+      details: 'Set RESEND_API_KEY in Render Environment Variables'
     };
   }
   
-  const fromEmail = 'sayalimakar9@gmail.com';
+  const fromEmail = process.env.EMAIL_USER || 'sayalimakar9@gmail.com';
+  const resend = new Resend(resendApiKey);
   
-  console.log('📧 Attempting to send email via SendGrid...');
+  console.log('📧 Attempting to send email via Resend...');
   console.log('From:', fromEmail);
   console.log('To:', email);
-  console.log('Service: SendGrid API');
+  console.log('Service: Resend API');
 
   try {
-    // Set the API key
-    sgMail.setApiKey(sendGridApiKey);
-
     const msg = {
       to: email,
       from: fromEmail,
@@ -68,25 +66,19 @@ module.exports = async (email, otp, fileInfo, shareLink) => {
       `,
     };
 
-    console.log('🔄 Sending email via SendGrid API...');
-    const info = await sgMail.send(msg);
-    console.log('✅ Email sent successfully via SendGrid!');
-    console.log('Response:', info[0].statusCode);
+    console.log('🔄 Sending email via Resend API...');
+    const info = await resend.emails.send(msg);
+    console.log('✅ Email sent successfully via Resend!');
+    console.log('Response:', info);
     return { success: true, info };
   } catch (error) {
-    console.error('❌ Error sending email via SendGrid:');
+    console.error('❌ Error sending email via Resend:');
     console.error('Error Message:', error.message);
-    console.error('Error Code:', error.code);
-    
-    if (error.response) {
-      console.error('SendGrid Response:', error.response.body);
-    }
     
     // Return error details instead of throwing
     return { 
       success: false, 
       error: error.message,
-      code: error.code || 'UNKNOWN',
       details: 'Check backend logs for detailed error information'
     };
   }
