@@ -16,7 +16,7 @@ module.exports = async (email, otp) => {
     throw new Error('Resend API key not configured. Please set RESEND_API_KEY in Render Environment Variables');
   }
   
-  const fromEmail = process.env.EMAIL_USER || 'sayalimakar9@gmail.com';
+  const fromEmail = 'onboarding@resend.dev'; // Use Resend's test email - no verification needed
   const resend = new Resend(resendApiKey);
 
   console.log('📧 Attempting to send OTP verification email via Resend...');
