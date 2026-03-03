@@ -47,6 +47,7 @@ const SharedFileAccess: React.FC = () => {
   
   // Initialize by verifying the share exists
   useEffect(() => {
+    console.log('SharedFileAccess component loaded, verifying share:', shareId);
     const verifyShare = async () => {
       if (!shareId) {
         console.error('❌ No shareId found in URL');
