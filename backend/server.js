@@ -20,12 +20,26 @@ const shareRoutes = require('./routes/shares');
 const app = express();
 
 // Configure CORS to allow requests from the frontend
+const allowedOrigins = [
+  'https://secure-file-sharing-app-tor7.vercel.app',              // Main production frontend URL
+  'https://secure-file-sharing-app-tor7-9k3qcqmas.vercel.app',    // Preview deployment
+  'https://secure-file-sharing-app-tor7-4o7rptkj4.vercel.app',    // Preview deployment
+  'http://localhost:3000',  // For local development
+  'http://localhost:5000'   // For local testing
+];
+
 app.use(cors({
-  origin: [
-    'https://secure-file-sharing-app-tor7-4o7rptkj4.vercel.app',
-    'http://localhost:3000',  // For local development
-    'http://localhost:5000'   // For local testing
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    // Allow if in the explicit list
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any Vercel preview deployment for this app
+    if (origin.match(/^https:\/\/secure-file-sharing-app-tor7.*\.vercel\.app$/)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
