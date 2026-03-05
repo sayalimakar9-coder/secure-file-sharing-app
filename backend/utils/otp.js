@@ -1,32 +1,38 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
 /**
- * Send OTP verification email using Resend
+ * Send OTP verification email using Nodemailer (Gmail)
  * @param {string} email - Recipient email
  * @param {string} otp - One-time password
  * @returns {Promise} - Result of sending the email
  */
 module.exports = async (email, otp) => {
-  // Use environment variable (required on Render)
-  const resendApiKey = process.env.RESEND_API_KEY;
-  
-  if (!resendApiKey) {
-    console.error('❌ Resend API key not configured!');
-    console.error('Please set RESEND_API_KEY environment variable in Render');
-    throw new Error('Resend API key not configured. Please set RESEND_API_KEY in Render Environment Variables');
-  }
-  
-  const fromEmail = 'onboarding@resend.dev'; // Use Resend's test email - no verification needed
-  const resend = new Resend(resendApiKey);
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
 
-  console.log('📧 Attempting to send OTP verification email via Resend...');
-  console.log('From:', fromEmail);
+  if (!emailUser || !emailPass) {
+    console.error('❌ Email credentials not configured!');
+    console.error('Please set EMAIL_USER and EMAIL_PASS environment variables');
+    throw new Error('Email credentials not configured. Please set EMAIL_USER and EMAIL_PASS');
+  }
+
+  // Create Nodemailer transporter with Gmail
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+
+  console.log('📧 Attempting to send OTP verification email via Gmail...');
+  console.log('From:', emailUser);
   console.log('To:', email);
 
   try {
-    const msg = {
+    const mailOptions = {
+      from: `"Secure File Sharing" <${emailUser}>`,
       to: email,
-      from: fromEmail,
       subject: 'Verify Your Account',
       text: `Your verification code is: ${otp}. This code will expire in 10 minutes.`,
       html: `
@@ -48,15 +54,14 @@ module.exports = async (email, otp) => {
       `,
     };
 
-    console.log('🔄 Sending OTP via Resend API...');
-    const info = await resend.emails.send(msg);
-    console.log('✅ OTP email sent successfully via Resend!');
-    console.log('Response:', info);
+    console.log('🔄 Sending OTP via Gmail...');
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ OTP email sent successfully via Gmail!');
+    console.log('Message ID:', info.messageId);
     return info;
   } catch (error) {
-    console.error('❌ Error sending OTP email via Resend:');
+    console.error('❌ Error sending OTP email via Gmail:');
     console.error('Error Message:', error.message);
-    
     throw error;
   }
 };

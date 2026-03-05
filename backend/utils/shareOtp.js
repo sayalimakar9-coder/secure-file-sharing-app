@@ -1,7 +1,7 @@
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 
 /**
- * Send share OTP email to recipient using Resend
+ * Send share OTP email to recipient using Nodemailer (Gmail)
  * @param {string} email - Recipient email
  * @param {string} otp - One-time password
  * @param {Object} fileInfo - Information about the shared file
@@ -9,33 +9,39 @@ const { Resend } = require('resend');
  * @returns {Promise} - Result of sending the email
  */
 module.exports = async (email, otp, fileInfo, shareLink) => {
-  // Use environment variable (required on Render)
-  const resendApiKey = process.env.RESEND_API_KEY;
-  
-  if (!resendApiKey) {
-    console.error('❌ Resend API key not configured!');
-    console.error('Please set RESEND_API_KEY environment variable in Render');
-    return { 
-      success: false, 
-      error: 'Resend API key not configured',
-      details: 'Set RESEND_API_KEY in Render Environment Variables'
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  if (!emailUser || !emailPass) {
+    console.error('❌ Email credentials not configured!');
+    console.error('Please set EMAIL_USER and EMAIL_PASS environment variables');
+    return {
+      success: false,
+      error: 'Email credentials not configured',
+      details: 'Set EMAIL_USER and EMAIL_PASS in Environment Variables'
     };
   }
-  
-  const fromEmail = 'onboarding@resend.dev'; // Use Resend's test email - no verification needed
-  const resend = new Resend(resendApiKey);
-  
-  console.log('📧 Attempting to send email via Resend...');
-  console.log('From:', fromEmail);
+
+  // Create Nodemailer transporter with Gmail
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+
+  console.log('📧 Attempting to send share OTP email via Gmail...');
+  console.log('From:', emailUser);
   console.log('To:', email);
-  console.log('Service: Resend API');
+  console.log('Share link:', shareLink);
 
   try {
-    const msg = {
+    const mailOptions = {
+      from: `"Secure File Sharing" <${emailUser}>`,
       to: email,
-      from: fromEmail,
       subject: 'File Shared With You - Access Verification',
-      text: `A file has been shared with you. Your verification code is: ${otp}. Use this code to access the file.`,
+      text: `A file has been shared with you. Your verification code is: ${otp}. Use this code to access the file at: ${shareLink}`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; font-size: 16px; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <h2 style="color: #3f51b5; margin-bottom: 20px; text-align: center;">Secure File Share</h2>
@@ -66,18 +72,17 @@ module.exports = async (email, otp, fileInfo, shareLink) => {
       `,
     };
 
-    console.log('🔄 Sending email via Resend API...');
-    const info = await resend.emails.send(msg);
-    console.log('✅ Email sent successfully via Resend!');
-    console.log('Response:', info);
+    console.log('🔄 Sending share OTP via Gmail...');
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Share OTP email sent successfully via Gmail!');
+    console.log('Message ID:', info.messageId);
     return { success: true, info };
   } catch (error) {
-    console.error('❌ Error sending email via Resend:');
+    console.error('❌ Error sending share OTP email via Gmail:');
     console.error('Error Message:', error.message);
-    
-    // Return error details instead of throwing
-    return { 
-      success: false, 
+
+    return {
+      success: false,
       error: error.message,
       details: 'Check backend logs for detailed error information'
     };
