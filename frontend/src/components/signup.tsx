@@ -15,6 +15,7 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { GoogleIcon, FacebookIcon } from './customicon';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -108,9 +109,9 @@ export default function SignUp() {
       try {
         setLoading(true);
 
-        // Make API call directly from component
+        // Make API call using config
         const response = await axios.post(
-          "https://secure-file-backend-98yd.onrender.com/api/auth/register", {
+          `${API_BASE_URL}/auth/register`, {
             username,
             email,
             phone: phoneNumber,
