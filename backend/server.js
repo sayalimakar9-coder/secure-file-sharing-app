@@ -1,11 +1,9 @@
-// Load environment variables from .env file (development only)
-// On Render: environment variables are set directly via dashboard
-if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'dev') {
-  try {
-    require('dotenv').config();
-  } catch (e) {
-    // Ignore if dotenv not available
-  }
+// Load environment variables from .env file
+// On Render: environment variables set via dashboard take precedence
+try {
+  require('dotenv').config();
+} catch (e) {
+  // Ignore if dotenv not available or .env file missing
 }
 
 const express = require('express');
