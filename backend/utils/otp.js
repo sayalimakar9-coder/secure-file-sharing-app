@@ -16,13 +16,21 @@ module.exports = async (email, otp) => {
     throw new Error('Email credentials not configured. Please set EMAIL_USER and EMAIL_PASS');
   }
 
-  // Create Gmail SMTP transporter
+  // Create Gmail SMTP transporter with explicit settings to avoid connection timeouts on cloud hosts
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // Use STARTTLS (port 587), NOT SSL (port 465)
     auth: {
       user: emailUser,
       pass: emailPass,
     },
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certs (needed on some cloud hosts)
+    },
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 20000,   // 20 seconds
+    socketTimeout: 30000,     // 30 seconds
   });
 
   const mailOptions = {
