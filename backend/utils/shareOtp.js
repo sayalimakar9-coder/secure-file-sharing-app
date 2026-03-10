@@ -1,31 +1,18 @@
 const { Resend } = require('resend');
 
 /**
- * Send share OTP email to recipient using Resend API
- * Falls back to logging OTP if Resend API key is not configured
+ * Send share OTP email to recipient.
+ * Tries Resend API. If it fails, returns gracefully so the OTP
+ * can be shown to the sharer for manual delivery.
+ *
  * @param {string} email - Recipient email
  * @param {string} otp - One-time password
  * @param {Object} fileInfo - Information about the shared file
  * @param {string} shareLink - Link to access the shared file
- * @returns {Promise} - Result of sending the email
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
 module.exports = async (email, otp, fileInfo, shareLink) => {
   const resendApiKey = process.env.RESEND_API_KEY;
-  const emailUser = process.env.EMAIL_USER || 'noreply@example.com';
-
-  // If no Resend API key, log the OTP but still allow the share to work
-  if (!resendApiKey) {
-    console.warn('⚠️ RESEND_API_KEY not configured - email not sent');
-    console.log('📋 Share OTP (manual delivery needed):', otp);
-    console.log('📬 Would have sent to:', email);
-    return {
-      success: false,
-      error: 'Email service not configured',
-      details: 'Set RESEND_API_KEY in Render Environment Variables'
-    };
-  }
-
-  const resend = new Resend(resendApiKey);
 
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; line-height: 1.5; font-size: 16px; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
@@ -56,29 +43,33 @@ module.exports = async (email, otp, fileInfo, shareLink) => {
     </div>
   `;
 
-  console.log('📧 Attempting to send share OTP email via Resend API...');
-  console.log('To:', email);
-  console.log('Share link:', shareLink);
+  // Try Resend API
+  if (resendApiKey && resendApiKey !== 're_your_api_key_here') {
+    const resend = new Resend(resendApiKey.trim());
+    console.log(`📧 Attempting to send share OTP email via Resend...`);
+    console.log('To:', email);
 
-  try {
-    const data = await resend.emails.send({
-      from: 'Secure File Sharing <onboarding@resend.dev>',
-      to: [email],
-      subject: 'File Shared With You - Access Verification',
-      html: htmlBody,
-    });
+    try {
+      const { data, error } = await resend.emails.send({
+        from: 'Secure Share <onboarding@resend.dev>',
+        to: email.trim(),
+        subject: 'File Shared With You - Access Verification',
+        html: htmlBody,
+      });
 
-    console.log('✅ Share OTP email sent successfully via Resend!');
-    console.log('Email ID:', data.id);
-    return { success: true, info: data };
-  } catch (error) {
-    console.error('❌ Error sending share OTP email via Resend:');
-    console.error('Error details:', error.message);
+      if (error) {
+        console.error('❌ Resend API error:', error.message);
+        return { success: false, error: error.message };
+      }
 
-    return {
-      success: false,
-      error: error.message || 'Unknown error',
-      details: 'Check backend logs for detailed error information'
-    };
+      console.log('✅ Share OTP email sent via Resend! ID:', data.id);
+      return { success: true, info: data };
+    } catch (err) {
+      console.error('❌ Resend failed:', err.message);
+      return { success: false, error: err.message };
+    }
   }
+
+  console.warn('⚠️ Resend API key not configured or using placeholder.');
+  return { success: false, error: 'No email service configured' };
 };

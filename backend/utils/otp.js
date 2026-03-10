@@ -1,23 +1,15 @@
 const { Resend } = require('resend');
 
 /**
- * Send OTP verification email using Resend API
- * Falls back gracefully if API key is not configured
+ * Send OTP verification email for signup.
+ * Tries Resend API. If it fails, returns gracefully.
+ *
  * @param {string} email - Recipient email
  * @param {string} otp - One-time password
- * @returns {Promise} - Result of sending the email
+ * @returns {Promise<{success: boolean, error?: string}>}
  */
 module.exports = async (email, otp) => {
   const resendApiKey = process.env.RESEND_API_KEY;
-
-  if (!resendApiKey) {
-    console.warn('⚠️ RESEND_API_KEY not configured - OTP email not sent');
-    console.log('📋 Signup OTP (manual delivery needed):', otp);
-    console.log('📬 Would have sent to:', email);
-    throw new Error('Email service not configured. Please set RESEND_API_KEY in environment variables.');
-  }
-
-  const resend = new Resend(resendApiKey);
 
   const htmlBody = `
     <div style="font-family: Arial, sans-serif; line-height: 1.5; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
@@ -37,23 +29,32 @@ module.exports = async (email, otp) => {
     </div>
   `;
 
-  console.log('📧 Attempting to send OTP verification email via Resend API...');
-  console.log('To:', email);
+  // Try Resend API
+  if (resendApiKey && resendApiKey !== 're_your_api_key_here') {
+    const resend = new Resend(resendApiKey.trim());
+    console.log(`📧 Attempting to send OTP email via Resend...`);
 
-  try {
-    const data = await resend.emails.send({
-      from: 'Secure File Sharing <onboarding@resend.dev>',
-      to: [email],
-      subject: 'Verify Your Account - Secure File Sharing',
-      html: htmlBody,
-    });
+    try {
+      const { data, error } = await resend.emails.send({
+        from: 'Secure Share <onboarding@resend.dev>',
+        to: email.trim(),
+        subject: 'Verify Your Account - Secure File Sharing',
+        html: htmlBody,
+      });
 
-    console.log('✅ OTP email sent successfully via Resend!');
-    console.log('Email ID:', data.id);
-    return data;
-  } catch (error) {
-    console.error('❌ Error sending OTP email via Resend:');
-    console.error('Error details:', error.message);
-    throw error;
+      if (error) {
+        console.error('❌ Resend API error:', error.message);
+        return { success: false, error: error.message };
+      }
+
+      console.log('✅ OTP email sent via Resend! ID:', data.id);
+      return { success: true, info: data };
+    } catch (err) {
+      console.error('❌ Resend failed:', err.message);
+      return { success: false, error: err.message };
+    }
   }
+
+  console.warn('⚠️ Resend API key not configured or using placeholder.');
+  return { success: false, error: 'No email service configured' };
 };
